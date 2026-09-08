@@ -1,0 +1,43 @@
+:root {
+  --bg-void: #0d0f14;
+  --bg-deep: #14171f;
+  --bg-panel: #1b1f2a;
+  --bg-panel-2: #222738;
+  --bg-panel-glass: rgba(27, 31, 42, 0.72);
+  --border-soft: rgba(140, 150, 175, 0.18);
+  --border-strong: rgba(200, 170, 110, 0.45);
+
+  --brass: #c8a060;
+  --brass-bright: #e8c890;
+  --brass-dim: #8a6f45;
+  --steel: #a5acb8;
+  --steel-dim: #6b7280;
+
+  --text-primary: #e7e6e0;
+  --text-secondary: #a9adba;
+  --text-muted: #767c8c;
+
+  --cool: #6ec3d8;
+  --heat-cold: #6ec3d8;
+  --heat-hot: #ff5a4d;
+  --heat-crit: #ff2e2e;
+
+  --good: #7fd88f;
+  --bad: #e2726b;
+
+  --gold: #ffd873;
+
+  --font-display: 'IM Fell English SC', serif;
+  --font-body: 'Spectral', serif;
+  --font-mono: 'Roboto Condensed', sans-serif;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  --shadow-glow-heat: 0 0 24px rgba(255, 90, 77, calc(var(--heat, 0) * 0.5));
+
+  --transition-fast: 120ms ease;
+  --transition-med: 260ms ease;
+}

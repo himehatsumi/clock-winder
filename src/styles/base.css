@@ -1,0 +1,144 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-void);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  color: var(--brass-bright);
+  font-weight: 400;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  background: none;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+::selection {
+  background: var(--brass-dim);
+  color: #fff;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translate(-50%, 0) scale(0.85);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-50%, -4px) scale(1);
+  }
+  100% {
+    transform: translate(-50%, -46px) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes shakeScreen {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(-3px, 2px);
+  }
+  40% {
+    transform: translate(3px, -2px);
+  }
+  60% {
+    transform: translate(-2px, -1px);
+  }
+  80% {
+    transform: translate(2px, 1px);
+  }
+}
+
+@keyframes sweepShine {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes spinSlow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.screen-shake {
+  animation: shakeScreen 0.4s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+.reduced-motion * {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+}

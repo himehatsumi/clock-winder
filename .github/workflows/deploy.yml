@@ -2,7 +2,6 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [claude/game-refactor-overhaul-mb55ri]
   workflow_dispatch:
 
 permissions:

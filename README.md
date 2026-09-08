@@ -1,6 +1,6 @@
 # The Last Clockwinder
 
-**[Play it here](https://himehatsumi.github.io/clock-winder/)** — works on desktop
+**[Play it here](https://himehatsumi.github.io/clock-winder/)** — works desktop
 and mobile, nothing to install. (One-time setup note for the repo owner is at the
 bottom of this file if the link isn't live yet.)
 

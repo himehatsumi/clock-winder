@@ -8,11 +8,13 @@ import { EnergyPanel, EventBanner, HeatPanel, PrecisionPanel, StatsPanel, Tutori
 import { RewindButton, RewindHint, SkillcheckBar, WindButton } from '../Controls';
 import UpgradeShop from '../Shop';
 import AchievementsPanel from '../AchievementsPanel';
-import { IconMenu, IconSpeaker } from '../icons';
+import HowToPlay from '../HowToPlay';
+import { IconHelp, IconMenu, IconSpeaker } from '../icons';
 
 export default function GameScreen() {
   const snap = useSnapshot(engine);
   const [showAchievements, setShowAchievements] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     const onClick = () => engine.globalClickAttempt();
@@ -63,6 +65,9 @@ export default function GameScreen() {
             Score: <span>{formatInt(snap.score)}</span>
           </div>
         </div>
+        <button className="icon-button" onClick={() => setShowHelp(true)} title="How to Play">
+          <IconHelp />
+        </button>
         <button className="icon-button" onClick={() => setShowAchievements(true)} title="Achievements">
           <IconMenu />
         </button>
@@ -103,6 +108,19 @@ export default function GameScreen() {
       </section>
 
       {showAchievements && <AchievementsPanel onClose={() => setShowAchievements(false)} />}
+      {showHelp && (
+        <div className="modal-backdrop" onClick={() => setShowHelp(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>How to Play</h2>
+              <button className="modal-close" onClick={() => setShowHelp(false)} aria-label="Close">
+                ×
+              </button>
+            </div>
+            <HowToPlay />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

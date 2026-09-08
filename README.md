@@ -1,5 +1,9 @@
 # The Last Clockwinder
 
+**[Play it here](https://himehatsumi.github.io/clock-winder/)** — works on desktop
+and mobile, nothing to install. (One-time setup note for the repo owner is at the
+bottom of this file if the link isn't live yet.)
+
 The Great Clock nears midnight. As its final keeper, wind it back with a
 rhythm-game skillcheck, manage Heat and Precision, rewind time when things
 get too hot, and spend salvaged Components on Workshop upgrades — for as
@@ -12,11 +16,17 @@ meta-progression layer.
 
 ## Playing
 
-- **Initiate Winding** to start a skillcheck; click again when the marker is
+Open the [play link](https://himehatsumi.github.io/clock-winder/) in any modern
+browser — desktop or phone. The intro screen's "Begin" button walks first-time
+players through the mechanics one at a time; a **?** button in the top bar
+reopens the same instructions at any point during a run.
+
+- **Initiate Winding** to start a skillcheck; press again when the marker is
   inside the zone. Landing the narrow gold band is a Great Success.
-- Hold **Space** or **right-click** to rewind — it costs Rewind Energy but
+- On desktop, hold **Space** or **right-click** to rewind. On a touch device,
+  hold the on-screen **Rewind** button instead — it costs Rewind Energy but
   cools the mechanism and buys you time.
-- Click loose gears near the clock face for bonus Components.
+- Tap/click loose gears near the clock face for bonus Components.
 - Spend Components in the Workshop for permanent-for-the-run upgrades.
 - When the clock strikes midnight, your score converts into **Temporal
   Cores** — a permanent currency spent on the Temporal Legacy upgrades that
@@ -56,3 +66,11 @@ src/engine/   simulation, upgrades, events, achievements, legacy, save, audio
 src/ui/       React components and hooks
 src/styles/   design tokens, base styles, component styles
 ```
+
+## Deployment
+
+`.github/workflows/deploy.yml` builds the site and publishes it to GitHub
+Pages on every push. If the play link above isn't live yet, it needs a
+one-time toggle: **Settings → Pages → Build and deployment → Source →
+GitHub Actions**. After that the workflow deploys automatically and the
+site is live at `https://<owner>.github.io/clock-winder/`.

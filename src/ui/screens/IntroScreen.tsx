@@ -4,6 +4,7 @@ import { formatDuration, formatInt } from '../../engine/format';
 import { useSnapshot } from '../hooks';
 import LegacyPanel from '../LegacyPanel';
 import AchievementsPanel from '../AchievementsPanel';
+import HowToPlay from '../HowToPlay';
 
 export default function IntroScreen() {
   const snap = useSnapshot(engine);
@@ -15,17 +16,10 @@ export default function IntroScreen() {
       <div className="intro-card">
         <h1>The Last Clockwinder</h1>
         <p className="intro-lore">
-          The Great Clock nears midnight. As its final keeper, you must fight against the relentless march of time.
+          The Great Clock nears midnight. As its final keeper, fight the relentless march of time — for as long as
+          you can.
         </p>
-        <p className="intro-lore">
-          Click <strong>Initiate Winding</strong> to trigger a skillcheck, gaining time on success but risking heat
-          and jams. Hold <kbd>Space</kbd> or <kbd>Right-Click</kbd> to rewind time, cooling the mechanism at the cost
-          of energy.
-        </p>
-        <p className="intro-lore">
-          Purchase upgrades with Components gathered from skillchecks and falling gears. Keep the clock running. Do
-          not let it strike twelve.
-        </p>
+        <HowToPlay />
 
         {(snap.best.score > 0 || snap.legacy.cores > 0 || snap.legacy.levels.startComponents > 0) && (
           <div className="intro-stats-row">
@@ -54,6 +48,7 @@ export default function IntroScreen() {
             Skip Onboarding
           </button>
         </div>
+        {!snap.hasSavedRun && <p className="intro-hint">New here? Begin walks you through everything, step by step.</p>}
 
         <div className="intro-links">
           <button className="link-button" onClick={() => setShowLegacy(true)}>

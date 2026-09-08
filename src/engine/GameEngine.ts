@@ -13,11 +13,13 @@ import {
   LEGACY_COST_MULTIPLIERS,
   MAX_COMBO_MULTIPLIER,
   MAX_DELTA_TIME,
+  MAX_REWARD_COMBO,
   MIN_SKILLCHECK_DURATION,
   SKILLCHECK_FAIL_JAM_DURATION,
   SKILLCHECK_SCORE_BONUS,
   STARTING_SECONDS_BEFORE_MIDNIGHT,
-  TUTORIAL_STAGE_TIMES,
+  TUTORIAL_STAGE_FALLBACK_SECONDS,
+  TUTORIAL_SPOTLIGHT_TARGETS,
 } from './constants';
 import { ACHIEVEMENT_DEFS } from './achievements';
 import { Emitter } from './emitter';
@@ -52,11 +54,16 @@ export interface FrameData {
   heatPercent: number;
   isRewinding: boolean;
   isOverheating: boolean;
+  elapsedRealTime: number;
 }
 
 interface EngineState {
   status: 'intro' | 'running' | 'gameOver';
   tutorialStage: number;
+  tutorialStageEnteredAt: number;
+  tutorialWindsThisRun: number;
+  tutorialRewindsThisRun: number;
+  tutorialGearsThisRun: number;
   elapsedRealTime: number;
   gameTimeSeconds: number;
   score: number;
@@ -85,7 +92,6 @@ interface EngineState {
   heatJamChance: number;
 
   gearSpawnChance: number;
-  currentGearSpawnChance: number;
   maxActiveGears: number;
   gearValueBase: number;
   gearTimeBonus: number;
@@ -173,6 +179,10 @@ export class GameEngine {
     this.state = {
       status: 'intro',
       tutorialStage: 0,
+      tutorialStageEnteredAt: 0,
+      tutorialWindsThisRun: 0,
+      tutorialRewindsThisRun: 0,
+      tutorialGearsThisRun: 0,
       elapsedRealTime: 0,
       gameTimeSeconds: STARTING_SECONDS_BEFORE_MIDNIGHT,
       score: 0,
@@ -201,11 +211,10 @@ export class GameEngine {
       heatJamChance: HEAT_JAM_CHANCE,
 
       gearSpawnChance: 0.2,
-      currentGearSpawnChance: 0,
       maxActiveGears: 6,
-      gearValueBase: 1.5,
-      gearTimeBonus: 0.05,
-      gearLifetime: 6.0,
+      gearValueBase: 2.25,
+      gearTimeBonus: 0.08,
+      gearLifetime: 7.0,
       gearCounter: 0,
       gears: [],
 
@@ -294,8 +303,11 @@ export class GameEngine {
     const s = this.state;
     s.status = 'running';
     s.tutorialStage = skipTutorial ? 5 : 0;
-    s.elapsedRealTime = skipTutorial ? TUTORIAL_STAGE_TIMES[5] : 0;
-    s.currentGearSpawnChance = skipTutorial ? s.gearSpawnChance : 0;
+    s.tutorialStageEnteredAt = 0;
+    s.tutorialWindsThisRun = 0;
+    s.tutorialRewindsThisRun = 0;
+    s.tutorialGearsThisRun = 0;
+    s.elapsedRealTime = 0;
     s.gameTimeSeconds = STARTING_SECONDS_BEFORE_MIDNIGHT;
     s.score = 0;
     s.components = 25;
@@ -329,7 +341,7 @@ export class GameEngine {
     s.rewindPowerPerSecondBase = 2.85;
     s.autoWindPowerBase = 0;
     s.gearSpawnChance = 0.2;
-    s.gearValueBase = 1.5;
+    s.gearValueBase = 2.25;
     s.baseEventChance = 0.25;
     s.goodEventBias = 0.5;
     s.skillcheckSuccessZoneWidthBase = BASE_SKILLCHECK_SUCCESS_ZONE_WIDTH;
@@ -365,7 +377,6 @@ export class GameEngine {
     s.timeSinceLastEventCheck = 0;
     s.modifiers = {};
     s.activeModifierKeys = [];
-    s.currentGearSpawnChance = s.tutorialStage >= 5 ? s.gearSpawnChance : s.currentGearSpawnChance;
     this.lastTimestamp = 0;
     this.markDirty();
     this.flushSnapshot();
@@ -415,6 +426,10 @@ export class GameEngine {
       gameTimeSeconds: s.gameTimeSeconds,
       elapsedRealTime: s.elapsedRealTime,
       tutorialStage: s.tutorialStage,
+      tutorialStageEnteredAt: s.tutorialStageEnteredAt,
+      tutorialWindsThisRun: s.tutorialWindsThisRun,
+      tutorialRewindsThisRun: s.tutorialRewindsThisRun,
+      tutorialGearsThisRun: s.tutorialGearsThisRun,
       score: s.score,
       components: s.components,
       currentHeat: s.currentHeat,
@@ -556,6 +571,7 @@ export class GameEngine {
     s.gameTimeSeconds += s.gearTimeBonus;
     s.currentHeat = Math.min(s.maxHeat, s.currentHeat + s.heatPerGearClick);
     s.lifetimeGearsCollected += 1;
+    s.tutorialGearsThisRun += 1;
     this.spawnFloatingText(gear.x + 11, gear.y + 11, `+${s.gearValueBase.toFixed(1)}`, 'components');
     this.emitCue('gearCollect');
     setTimeout(() => {
@@ -595,7 +611,7 @@ export class GameEngine {
   private startSkillcheck() {
     const s = this.state;
     if (s.isSkillcheckActive || s.isWindJammed || s.status !== 'running') return;
-    const comboTier = Math.floor(s.skillcheckCombo / 5);
+    const comboTier = Math.floor(Math.min(s.skillcheckCombo, MAX_REWARD_COMBO) / 5);
     const durationMultiplier = Math.pow(0.92, comboTier) * this.getModifier('skillcheckSpeed');
     s.skillcheckDuration = Math.max(MIN_SKILLCHECK_DURATION, BASE_SKILLCHECK_DURATION * durationMultiplier);
     s.isSkillcheckActive = true;
@@ -645,6 +661,7 @@ export class GameEngine {
     const s = this.state;
     s.skillcheckCombo += 1;
     s.lifetimeSuccessfulWinds += 1;
+    s.tutorialWindsThisRun += 1;
     let rewardMultiplier = 1.0;
     if (s.isGreatSuccess) {
       rewardMultiplier = 1.5;
@@ -714,6 +731,7 @@ export class GameEngine {
     const s = this.state;
     if (s.status !== 'running' || s.currentRewindEnergy <= 0 || s.isRewinding) return;
     s.isRewinding = true;
+    s.tutorialRewindsThisRun += 1;
     this.markDirty();
   }
 
@@ -793,18 +811,47 @@ export class GameEngine {
   }
 
   // --- Tutorial ---
+  /** Whether the action taught at this stage has been completed this run. */
+  private tutorialActionMet(stage: number): boolean {
+    const s = this.state;
+    switch (stage) {
+      case 0:
+        return s.tutorialWindsThisRun >= 1;
+      case 1:
+        return s.tutorialWindsThisRun >= 3;
+      case 2:
+        return s.upgradeLevels.click >= 1;
+      case 3:
+        return s.tutorialRewindsThisRun >= 1 || s.tutorialGearsThisRun >= 1;
+      case 4:
+        return s.precision <= 99;
+      default:
+        return false;
+    }
+  }
+
+  private setTutorialStage(newStage: number) {
+    const s = this.state;
+    s.tutorialStage = newStage;
+    s.tutorialStageEnteredAt = s.elapsedRealTime;
+    this.markDirty();
+  }
+
+  /** Manual "Got it" advance — satisfies the current stage regardless of the action gate. */
+  advanceTutorialManually(): void {
+    const s = this.state;
+    if (s.tutorialStage >= 5) return;
+    this.setTutorialStage(s.tutorialStage + 1);
+    this.flushSnapshot();
+  }
+
   private advanceTutorial() {
     const s = this.state;
-    let newStage = s.tutorialStage;
-    for (let i = s.tutorialStage + 1; i < TUTORIAL_STAGE_TIMES.length; i++) {
-      if (s.elapsedRealTime >= TUTORIAL_STAGE_TIMES[i]) newStage = i;
-    }
-    if (newStage !== s.tutorialStage) {
-      s.tutorialStage = newStage;
-      if (newStage === 2) s.currentGearSpawnChance = 0.02;
-      else if (newStage === 3) s.currentGearSpawnChance = 0.08;
-      else if (newStage >= 4) s.currentGearSpawnChance = s.gearSpawnChance;
-      this.markDirty();
+    if (s.tutorialStage >= 5) return;
+    const stage = s.tutorialStage;
+    const fallbackElapsed = s.elapsedRealTime - s.tutorialStageEnteredAt >= TUTORIAL_STAGE_FALLBACK_SECONDS[stage];
+    if (this.tutorialActionMet(stage) || fallbackElapsed) {
+      this.setTutorialStage(stage + 1);
     }
   }
 
@@ -944,7 +991,8 @@ export class GameEngine {
     s.score += (effectiveAutoPower + (actualRewindActive ? s.rewindPowerPerSecondBase : 0)) * 0.01 * dt;
     s.components += s.passiveTickRate * dt;
 
-    if (s.tutorialStage >= 2 && Math.random() < s.currentGearSpawnChance * dt) {
+    const gearChance = s.tutorialStage >= 4 ? s.gearSpawnChance : s.tutorialStage === 3 ? 0.08 : s.tutorialStage === 2 ? 0.02 : 0;
+    if (gearChance > 0 && Math.random() < gearChance * dt) {
       this.spawnGear();
     }
 
@@ -974,6 +1022,7 @@ export class GameEngine {
       heatPercent,
       isRewinding: s.isRewinding,
       isOverheating: s.isOverheating,
+      elapsedRealTime: s.elapsedRealTime,
     });
 
     this.markDirty();
@@ -1024,6 +1073,7 @@ export class GameEngine {
     const snapshot: Snapshot = {
       status: s.status,
       tutorialStage: s.tutorialStage,
+      tutorialSpotlightTarget: TUTORIAL_SPOTLIGHT_TARGETS[s.tutorialStage] ?? null,
       gameTimeSeconds: s.gameTimeSeconds,
       startingSeconds: STARTING_SECONDS_BEFORE_MIDNIGHT,
       score: s.score,

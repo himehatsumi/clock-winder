@@ -22,6 +22,10 @@ export interface RunSave {
   gameTimeSeconds: number;
   elapsedRealTime: number;
   tutorialStage: number;
+  tutorialStageEnteredAt: number;
+  tutorialWindsThisRun: number;
+  tutorialRewindsThisRun: number;
+  tutorialGearsThisRun: number;
   score: number;
   components: number;
   currentHeat: number;

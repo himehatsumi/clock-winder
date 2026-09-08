@@ -3,11 +3,13 @@ import { useSnapshot } from './hooks';
 
 export function HeatPanel() {
   const snap = useSnapshot(engine);
+  if (snap.tutorialStage < 1) return null;
   const pct = snap.heat.max > 0 ? (snap.heat.current / snap.heat.max) * 100 : 0;
   const status = snap.heat.isOverheating ? 'Overheating!' : snap.heat.isHighHeat ? 'High Heat!' : 'Stable';
   const statusClass = snap.heat.isOverheating ? 'is-critical' : snap.heat.isHighHeat ? 'is-warning' : 'is-ok';
+  const spotlighted = snap.tutorialSpotlightTarget === 'heat-panel';
   return (
-    <div className="gauge-panel heat-panel">
+    <div className={`gauge-panel heat-panel${spotlighted ? ' tutorial-highlight' : ''}`}>
       <div className="gauge-label">
         Heat <span className="gauge-hint">(Rewind to cool)</span>
       </div>
@@ -24,8 +26,10 @@ export function HeatPanel() {
 
 export function PrecisionPanel() {
   const snap = useSnapshot(engine);
+  if (snap.tutorialStage < 4) return null;
+  const spotlighted = snap.tutorialSpotlightTarget === 'precision-panel';
   return (
-    <div className="gauge-panel precision-panel">
+    <div className={`gauge-panel precision-panel${spotlighted ? ' tutorial-highlight' : ''}`}>
       <div className="gauge-label">Precision</div>
       <div className="gauge-track">
         <div className="gauge-fill precision-fill" style={{ width: `${snap.precision.current}%` }} />
@@ -38,6 +42,7 @@ export function PrecisionPanel() {
 
 export function EnergyPanel() {
   const snap = useSnapshot(engine);
+  if (!snap.rewind.canRewind) return null;
   const pct = snap.rewind.max > 0 ? (snap.rewind.current / snap.rewind.max) * 100 : 0;
   return (
     <div className="gauge-panel energy-panel">
@@ -54,6 +59,7 @@ export function EnergyPanel() {
 
 export function StatsPanel() {
   const snap = useSnapshot(engine);
+  if (snap.tutorialStage < 2) return null;
   return (
     <div className="stats-panel">
       <div className="stats-row">
@@ -64,24 +70,31 @@ export function StatsPanel() {
         <span>Winding Boost</span>
         <strong>{snap.stats.clickPower.toFixed(2)}s</strong>
       </div>
-      <div className="stats-row">
-        <span>Auto-Winder</span>
-        <strong>{snap.stats.autoWindPower.toFixed(3)}s/s</strong>
-      </div>
-      <div className="stats-row">
-        <span>Cooling Rate</span>
-        <strong>{snap.stats.coolingRate.toFixed(1)}°/s</strong>
-      </div>
-      <div className="stats-row">
-        <span>Precision Decay</span>
-        <strong>{snap.stats.precisionDecayStat.toFixed(3)}%/s</strong>
-      </div>
+      {snap.tutorialStage >= 3 && (
+        <>
+          <div className="stats-row">
+            <span>Auto-Winder</span>
+            <strong>{snap.stats.autoWindPower.toFixed(3)}s/s</strong>
+          </div>
+          <div className="stats-row">
+            <span>Cooling Rate</span>
+            <strong>{snap.stats.coolingRate.toFixed(1)}°/s</strong>
+          </div>
+        </>
+      )}
+      {snap.tutorialStage >= 4 && (
+        <div className="stats-row">
+          <span>Precision Decay</span>
+          <strong>{snap.stats.precisionDecayStat.toFixed(3)}%/s</strong>
+        </div>
+      )}
     </div>
   );
 }
 
 export function EventBanner() {
   const snap = useSnapshot(engine);
+  if (snap.tutorialStage < 5) return null;
   if (!snap.event.current) {
     return <div className="event-banner is-empty">-- No Active Events --</div>;
   }
@@ -95,16 +108,24 @@ export function EventBanner() {
 }
 
 const TUTORIAL_MESSAGES: Record<number, string> = {
-  0: "Keep the clock from reaching midnight! Click 'Initiate Winding' to gain time.",
-  1: 'Winding gains time but adds Heat. Keep Heat low!',
-  2: "Winding also yields Components. Spend them in the Workshop below — try 'Reinforced Spring'.",
-  3: 'Click falling GEARS for bonuses. Manage Heat with REWIND (Space or Right-Click) — it costs Energy.',
-  4: 'PRECISION affects performance and decays over time. High Heat worsens decay!',
+  0: 'Press Initiate Winding, then press again when the marker lands in the bright zone.',
+  1: 'Winding heats up the mechanism. Land a few more to see how fast it climbs.',
+  2: 'Successful winds also earn Components. Buy Reinforced Spring in the Workshop below.',
+  3: 'Click falling gears near the clock for bonus Components. Hold Rewind (or the on-screen button) to cool down.',
+  4: "Precision affects your winding power and decays over time — faster if you're running hot.",
 };
 
 export function TutorialBanner() {
   const snap = useSnapshot(engine);
   const message = TUTORIAL_MESSAGES[snap.tutorialStage];
   if (!message || snap.tutorialStage >= 5) return null;
-  return <div className="tutorial-banner">{message}</div>;
+  return (
+    <div className="tutorial-banner">
+      <span className="tutorial-banner-step">Step {snap.tutorialStage + 1} of 5</span>
+      <span className="tutorial-banner-text">{message}</span>
+      <button className="tutorial-banner-next" onClick={() => engine.advanceTutorialManually()}>
+        Got it →
+      </button>
+    </div>
+  );
 }

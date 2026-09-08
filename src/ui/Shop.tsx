@@ -13,8 +13,9 @@ export default function UpgradeShop() {
       <div className="upgrade-grid">
         {visibleUpgrades.map((def) => {
           const info = snap.upgrades[def.key];
+          const spotlighted = snap.tutorialSpotlightTarget === 'upgrade-click' && def.key === 'click';
           return (
-            <div key={def.key} className="upgrade-card">
+            <div key={def.key} className={`upgrade-card${spotlighted ? ' tutorial-highlight' : ''}`}>
               <button
                 className="upgrade-buy-button"
                 disabled={!info.available}

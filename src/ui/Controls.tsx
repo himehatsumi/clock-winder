@@ -9,7 +9,7 @@ export function WindButton() {
   const disabled = snap.skillcheck.jammed;
   return (
     <button
-      className={`wind-button${snap.skillcheck.active ? ' is-active-check' : ''}${snap.tutorialStage === 0 ? ' tutorial-highlight' : ''}`}
+      className={`wind-button${snap.skillcheck.active ? ' is-active-check' : ''}${snap.tutorialSpotlightTarget === 'wind-button' ? ' tutorial-highlight' : ''}`}
       disabled={disabled}
       onClick={(e) => {
         e.stopPropagation();
@@ -70,7 +70,7 @@ export function RewindButton() {
 
   return (
     <button
-      className={`rewind-button touch-only${snap.rewind.isRewinding ? ' is-active' : ''}`}
+      className={`rewind-button touch-only${snap.rewind.isRewinding ? ' is-active' : ''}${snap.tutorialSpotlightTarget === 'rewind-control' ? ' tutorial-highlight' : ''}`}
       disabled={depleted}
       onPointerDown={start}
       onPointerUp={stop}
@@ -90,7 +90,7 @@ export function RewindHint() {
   const snap = useSnapshot(engine);
   if (!snap.rewind.canRewind) return null;
   return (
-    <div className={`rewind-hint pointer-only${snap.rewind.isRewinding ? ' is-active' : ''}`}>
+    <div className={`rewind-hint pointer-only${snap.rewind.isRewinding ? ' is-active' : ''}${snap.tutorialSpotlightTarget === 'rewind-control' ? ' tutorial-highlight' : ''}`}>
       Hold <kbd>Space</kbd> or <kbd>Right-Click</kbd> to Rewind
     </div>
   );

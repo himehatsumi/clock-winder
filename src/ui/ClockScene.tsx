@@ -2,6 +2,8 @@ import { useRef } from 'react';
 import { engine } from '../engine/singleton';
 import { useFrame, useSnapshot } from './hooks';
 
+const GEAR_EXPIRE_WARNING_SECONDS = 1.3;
+
 function handAngles(gameTimeSeconds: number) {
   const secondsPastTwelve = (43200 - Math.max(0, gameTimeSeconds)) % 43200;
   return {
@@ -17,6 +19,7 @@ export default function ClockScene() {
   const secondHandRef = useRef<SVGLineElement>(null);
   const minuteHandRef = useRef<SVGLineElement>(null);
   const hourHandRef = useRef<SVGLineElement>(null);
+  const gearRefs = useRef(new Map<number, HTMLButtonElement>());
 
   useFrame(engine, (frame) => {
     const angles = handAngles(frame.gameTimeSeconds);
@@ -26,6 +29,13 @@ export default function ClockScene() {
     sceneRef.current?.style.setProperty('--heat', frame.heatPercent.toFixed(3));
     sceneRef.current?.classList.toggle('is-rewinding', frame.isRewinding);
     sceneRef.current?.classList.toggle('is-overheating', frame.isOverheating);
+
+    for (const g of snap.gears) {
+      const el = gearRefs.current.get(g.id);
+      if (!el) continue;
+      const remaining = g.bornAt + g.lifetime - frame.elapsedRealTime;
+      el.classList.toggle('is-expiring', !g.collected && remaining <= GEAR_EXPIRE_WARNING_SECONDS);
+    }
   });
 
   return (
@@ -88,6 +98,10 @@ export default function ClockScene() {
         {snap.gears.map((g) => (
           <button
             key={g.id}
+            ref={(el) => {
+              if (el) gearRefs.current.set(g.id, el);
+              else gearRefs.current.delete(g.id);
+            }}
             className={`loose-gear${g.collected ? ' is-collected' : ''}`}
             style={{ left: `${(g.x / 200) * 100}%`, top: `${(g.y / 200) * 100}%` }}
             onClick={(e) => {

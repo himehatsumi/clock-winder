@@ -17,7 +17,24 @@ export const EVENT_CHECK_INTERVAL = 20.0;
 
 export const BASE_PASSIVE_TICK_RATE = 0.1;
 
-export const TUTORIAL_STAGE_TIMES = [0, 10, 30, 60, 90, 120];
+// Reward multiplier caps at combo 21 (1.0 + (21-1)*0.15 = 4.0 = MAX_COMBO_MULTIPLIER); skillcheck
+// sweep speed shouldn't keep compounding past that point, or difficulty and reward decouple.
+export const MAX_REWARD_COMBO = Math.round(1 + (MAX_COMBO_MULTIPLIER - 1) / COMBO_MULTIPLIER_STEP);
+
+// Tutorial stages 0-4 advance when the player does the taught action (see GameEngine's
+// advanceTutorial); these are safety-net ceilings (seconds spent in that stage) so nobody
+// gets soft-locked. Stage 5 is free play and has no fallback.
+export const TUTORIAL_STAGE_FALLBACK_SECONDS = [25, 30, 35, 40, 20];
+
+// What each stage 0-4 spotlights (dims the rest of the screen, glows this one); null = no spotlight.
+export const TUTORIAL_SPOTLIGHT_TARGETS: (string | null)[] = [
+  'wind-button',
+  'heat-panel',
+  'upgrade-click',
+  'rewind-control',
+  'precision-panel',
+  null,
+];
 
 export const COST_MULTIPLIERS: Record<string, number> = {
   click: 1.5,

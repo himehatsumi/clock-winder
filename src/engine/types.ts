@@ -98,6 +98,7 @@ export interface AchievementDef {
 export interface Snapshot {
   status: GameStatus;
   tutorialStage: number;
+  tutorialSpotlightTarget: string | null;
   gameTimeSeconds: number;
   startingSeconds: number;
   score: number;

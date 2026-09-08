@@ -70,7 +70,7 @@ export function RewindButton() {
 
   return (
     <button
-      className={`rewind-button${snap.rewind.isRewinding ? ' is-active' : ''}`}
+      className={`rewind-button touch-only${snap.rewind.isRewinding ? ' is-active' : ''}`}
       disabled={depleted}
       onPointerDown={start}
       onPointerUp={stop}
@@ -80,7 +80,18 @@ export function RewindButton() {
     >
       <IconRewind />
       <span className="rewind-button-label">Hold to Rewind</span>
-      <span className="rewind-button-sub">or Space / Right-Click</span>
     </button>
+  );
+}
+
+/** Shown on devices with a mouse/trackpad instead of the touch RewindButton — Space and
+ * right-click are already wired up globally, this is just the on-screen reminder. */
+export function RewindHint() {
+  const snap = useSnapshot(engine);
+  if (!snap.rewind.canRewind) return null;
+  return (
+    <div className={`rewind-hint pointer-only${snap.rewind.isRewinding ? ' is-active' : ''}`}>
+      Hold <kbd>Space</kbd> or <kbd>Right-Click</kbd> to Rewind
+    </div>
   );
 }

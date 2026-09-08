@@ -850,11 +850,6 @@ kbd {
   font-size: 1em;
 }
 
-.rewind-button-sub {
-  font-size: 0.68em;
-  color: var(--text-muted);
-}
-
 .rewind-button:hover:not(:disabled) {
   background: rgba(110, 195, 216, 0.2);
 }
@@ -876,10 +871,36 @@ kbd {
   background: rgba(0, 0, 0, 0.15);
 }
 
+.rewind-hint {
+  text-align: center;
+  font-size: 0.78em;
+  color: var(--text-muted);
+  transition: color var(--transition-fast);
+}
+
+.rewind-hint.is-active {
+  color: var(--cool);
+}
+
 .action-dock {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+/* Show touch-oriented controls only on devices whose primary input is an
+   imprecise pointer with no hover (phones, most tablets); everything with a
+   mouse or trackpad keeps the plain keyboard/right-click hint instead. */
+@media (hover: hover) and (pointer: fine) {
+  .touch-only {
+    display: none;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .pointer-only {
+    display: none;
+  }
 }
 
 /* ---------- Shop ---------- */

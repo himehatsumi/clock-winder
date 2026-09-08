@@ -5,7 +5,7 @@ import { getTimeDescription } from '../../engine/format';
 import { useSnapshot } from '../hooks';
 import ClockScene from '../ClockScene';
 import { EnergyPanel, EventBanner, HeatPanel, PrecisionPanel, StatsPanel, TutorialBanner } from '../HUD';
-import { RewindButton, SkillcheckBar, WindButton } from '../Controls';
+import { RewindButton, RewindHint, SkillcheckBar, WindButton } from '../Controls';
 import UpgradeShop from '../Shop';
 import AchievementsPanel from '../AchievementsPanel';
 import { IconMenu, IconSpeaker } from '../icons';
@@ -91,6 +91,7 @@ export default function GameScreen() {
             <WindButton />
             <SkillcheckBar />
             <RewindButton />
+            <RewindHint />
             <EnergyPanel />
           </div>
         </div>

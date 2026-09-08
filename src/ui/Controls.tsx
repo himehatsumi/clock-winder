@@ -1,6 +1,8 @@
 import { useRef } from 'react';
+import type { PointerEvent as ReactPointerEvent } from 'react';
 import { engine } from '../engine/singleton';
 import { useFrame, useSnapshot } from './hooks';
+import { IconRewind } from './icons';
 
 export function WindButton() {
   const snap = useSnapshot(engine);
@@ -50,12 +52,35 @@ export function SkillcheckBar() {
   );
 }
 
-export function RewindHint() {
+export function RewindButton() {
   const snap = useSnapshot(engine);
   if (!snap.rewind.canRewind) return null;
+  const depleted = snap.rewind.current <= 0;
+
+  const start = (e: ReactPointerEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    engine.startRewind();
+  };
+  const stop = (e: ReactPointerEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    engine.stopRewind();
+  };
+
   return (
-    <div className={`rewind-hint${snap.rewind.isRewinding ? ' is-active' : ''}`}>
-      Hold <kbd>Space</kbd> / <kbd>Right-Click</kbd> to Rewind
-    </div>
+    <button
+      className={`rewind-button${snap.rewind.isRewinding ? ' is-active' : ''}`}
+      disabled={depleted}
+      onPointerDown={start}
+      onPointerUp={stop}
+      onPointerCancel={stop}
+      onClick={(e) => e.stopPropagation()}
+      onContextMenu={(e) => e.preventDefault()}
+    >
+      <IconRewind />
+      <span className="rewind-button-label">Hold to Rewind</span>
+      <span className="rewind-button-sub">or Space / Right-Click</span>
+    </button>
   );
 }

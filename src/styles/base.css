@@ -10,13 +10,20 @@ body,
   height: 100%;
 }
 
+html {
+  touch-action: pan-y;
+}
+
 body {
   font-family: var(--font-body);
   background: var(--bg-void);
   color: var(--text-primary);
   overflow-x: hidden;
+  overscroll-behavior-y: contain;
   font-size: 15px;
   -webkit-font-smoothing: antialiased;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 h1,
@@ -34,6 +41,10 @@ button {
   cursor: pointer;
   color: inherit;
   background: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
 button:disabled {
